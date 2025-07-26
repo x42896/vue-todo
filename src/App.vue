@@ -1,10 +1,14 @@
 <template>
-  <h1>Vue TODO App</h1>
+  <TodoApp />
 </template>
 
 <script>
+import TodoApp from './components/TodoApp.vue'
+
 export default {
-  name: 'App'
+  components: {
+    TodoApp
+  }
 }
 </script>
 

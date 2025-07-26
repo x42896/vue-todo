@@ -1,44 +1,62 @@
 <template>
   <div class="todo">
     <h2>Список задач</h2>
-
-    <form @submit.prevent="addTodo">
-      <input v-model="newTodo" placeholder="Новая задача..." />
-      <button>Добавить</button>
-    </form>
-
+    <TodoForm @add="addTodo" />
     <ul>
-      <li v-for="(todo, index) in todos" :key="index">
-        <label>
-          <input type="checkbox" v-model="todo.completed" />
-          <span :class="{ done: todo.completed }">{{ todo.text }}</span>
-        </label>
-        <button @click="removeTodo(index)">❌</button>
-      </li>
+      <TodoItem
+        v-for="(todo, index) in todos"
+        :key="index"
+        :todo="todo"
+        @remove="removeTodo(index)"
+        @update="saveTodos"
+      />
     </ul>
   </div>
 </template>
 
 <script>
+import TodoForm from './TodoForm.vue'
+import TodoItem from './TodoItem.vue'
+
 export default {
+  name: 'TodoApp',
+  components: {
+    TodoForm,
+    TodoItem
+  },
   data() {
     return {
-      newTodo: '',
       todos: []
     }
   },
+  mounted() {
+    const saved = localStorage.getItem('todos')
+    if (saved) {
+      this.todos = JSON.parse(saved)
+    }
+  },
+  watch: {
+    todos: {
+      handler() {
+        this.saveTodos()
+      },
+      deep: true
+    }
+  },
   methods: {
-    addTodo() {
-      if (this.newTodo.trim()) {
-        this.todos.push({
-          text: this.newTodo,
-          completed: false
-        })
-        this.newTodo = ''
-      }
+    addTodo(text) {
+      this.todos.push({
+        text,
+        completed: false
+      })
+      this.saveTodos()
     },
     removeTodo(index) {
       this.todos.splice(index, 1)
+      this.saveTodos()
+    },
+    saveTodos() {
+      localStorage.setItem('todos', JSON.stringify(this.todos))
     }
   }
 }
@@ -47,16 +65,6 @@ export default {
 <style scoped>
 .todo {
   max-width: 400px;
-  margin: 0 auto;
-}
-input[type="text"] {
-  width: 70%;
-}
-.done {
-  text-decoration: line-through;
-  color: gray;
-}
-button {
-  margin-left: 8px;
+  margin: 2rem auto;
 }
 </style>
